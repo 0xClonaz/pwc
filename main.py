@@ -24,23 +24,30 @@ def check_password():
     else:
         return jsonify({'leaked': False})
         
+@app.route('/api/v1/search_email', methods=['GET'])
 def search_email():
-    data = request.json
-    if not data or 'terms' not in data or 'types' not in data:
-        return jsonify({'error': 'Invalid input data'}), 400
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'No email provided'}), 400
 
     url = "https://api-experimental.snusbase.com/data/search"
     headers = {
         "Auth": "sbx39mh542d0oshydtx3oes9whn1ay",
         "Content-Type": "application/json"
     }
-    
+    data = {
+        "terms": [email],
+        "types": ["email"],
+        "wildcard": False
+    }
+
     response = requests.post(url, headers=headers, json=data)
-    
+
     if response.status_code == 200:
         return jsonify(response.json())
     else:
-        return jsonify({'error': 'Failed to fetch data from database'}), response.status_code
+        return jsonify({'error': 'Failed to fetch data from Snusbase'}), response.status_code
+
 
 if __name__ == '__main__':
     app.run(debug=True)
